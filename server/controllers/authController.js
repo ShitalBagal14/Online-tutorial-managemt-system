@@ -2,6 +2,9 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+// ==========================
+//     REGISTER USER
+// ==========================
 exports.registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -35,7 +38,7 @@ exports.registerUser = async (req, res) => {
 };
 
 // ==========================
-//         LOGIN
+//          LOGIN
 // ==========================
 exports.loginUser = async (req, res) => {
   try {
@@ -64,6 +67,60 @@ exports.loginUser = async (req, res) => {
     });
 
   } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ==========================
+//       GET PROFILE DATA
+// ==========================
+exports.getProfileData = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      message: "Profile data fetched successfully",
+      user,
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, phone, className, bio } = req.body;
+
+    let updateData = {
+      name,
+      phone,
+      className,
+      bio,
+    };
+
+    // If image uploaded, save file path
+    if (req.file) {
+      updateData.photo = `/uploads/${req.file.filename}`;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.userId,
+      updateData,
+      { new: true }
+    ).select("-password");
+
+    res.json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
+
+  } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 };

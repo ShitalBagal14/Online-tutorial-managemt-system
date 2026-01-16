@@ -16,5 +16,7 @@ mongoose
   .catch(err => console.log(err));
 
 app.use("/api/auth", authRoutes);
+app.use("/uploads", express.static("uploads"));
+
 
 app.listen(5000, () => console.log("Server running on port 5000"));
